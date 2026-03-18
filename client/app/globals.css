@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Source Serif 4', Georgia, serif;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: #f5f0e8;
+  color: #1a1a2e;
+}
+
+.font-display { font-family: var(--font-display); }
+
+@layer components {
+  .btn-primary {
+    @apply bg-amber text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-amber-light transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply bg-parchment text-ink border border-amber/30 px-4 py-2 rounded-lg font-semibold text-sm hover:border-amber/60 transition-colors duration-150;
+  }
+  .btn-danger {
+    @apply bg-rose text-white px-4 py-2 rounded-lg font-semibold text-sm hover:opacity-90 transition-opacity duration-150;
+  }
+  .card {
+    @apply bg-white rounded-xl border border-parchment shadow-card;
+  }
+  .input {
+    @apply w-full px-3 py-2 bg-white border border-parchment rounded-lg text-sm text-ink placeholder-muted focus:outline-none focus:border-amber focus:ring-1 focus:ring-amber/30 transition-colors duration-150;
+  }
+  .label {
+    @apply block text-xs font-semibold text-muted uppercase tracking-wider mb-1;
+  }
+  .badge-beginner {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700;
+  }
+  .badge-intermediate {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber/10 text-amber;
+  }
+  .badge-advanced {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald/10 text-emerald;
+  }
+  /* Weakness tag chip */
+  .tag-chip {
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-rose/10 text-rose border border-rose/20;
+  }
+  .tag-chip-selected {
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-rose text-white cursor-pointer;
+  }
+  .tag-chip-inactive {
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-parchment text-muted border border-parchment cursor-pointer hover:border-rose/40 hover:text-rose transition-colors;
+  }
+}
+
+/* Custom range slider */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: #ede8dc;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #d4820a;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 1px 4px rgba(212,130,10,0.4);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #d4820a;
+  cursor: pointer;
+  border: 2px solid white;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d4c9b0; border-radius: 2px; }
