@@ -90,9 +90,9 @@ export default function AiPanel({ open, onClose }: { open: boolean; onClose: () 
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-ink/20 md:hidden" onClick={onClose} />
+      <div className="fixed inset-0 z-[55] bg-ink/30 md:hidden" onClick={onClose} />
 
-      <div className="fixed right-0 top-0 h-full w-full md:w-[420px] z-50 flex flex-col bg-white shadow-2xl border-l border-parchment">
+      <div className="fixed right-0 top-0 w-full md:w-[420px] z-[60] flex flex-col bg-white shadow-2xl border-l border-parchment" style={{height:"100dvh"}}>
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 bg-ink border-b border-white/10 flex-shrink-0">

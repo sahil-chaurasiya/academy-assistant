@@ -4,7 +4,6 @@ import api from '@/lib/api';
 import { format } from 'date-fns';
 
 interface Announcement { _id: string; message: string; createdAt: string; createdBy?: { name: string }; }
-
 type ErrShape = { response?: { data?: { message?: string } } };
 
 export default function AnnouncementsPage() {
@@ -13,8 +12,6 @@ export default function AnnouncementsPage() {
   const [message, setMessage]   = useState('');
   const [saving, setSaving]     = useState(false);
   const [error, setError]       = useState('');
-
-  // Edit state
   const [editingId, setEditingId]     = useState<string | null>(null);
   const [editMessage, setEditMessage] = useState('');
   const [editSaving, setEditSaving]   = useState(false);
@@ -36,7 +33,7 @@ export default function AnnouncementsPage() {
     finally { setSaving(false); }
   };
 
-  const startEdit = (a: Announcement) => { setEditingId(a._id); setEditMessage(a.message); };
+  const startEdit  = (a: Announcement) => { setEditingId(a._id); setEditMessage(a.message); };
   const cancelEdit = () => { setEditingId(null); setEditMessage(''); };
 
   const handleEdit = async (id: string) => {
@@ -46,7 +43,7 @@ export default function AnnouncementsPage() {
       const { data } = await api.put(`/announcements/${id}`, { message: editMessage });
       setAnnouncements(prev => prev.map(a => a._id === id ? data : a));
       cancelEdit();
-    } catch (err) { alert((err as ErrShape)?.response?.data?.message || 'Failed to update'); }
+    } catch (err) { alert((err as ErrShape)?.response?.data?.message || 'Failed'); }
     finally { setEditSaving(false); }
   };
 
@@ -60,22 +57,27 @@ export default function AnnouncementsPage() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-3xl">
-      <div className="mb-6">
+    <div className="p-3 md:p-8 max-w-3xl mx-auto">
+      <div className="mb-5 md:mb-6">
         <h1 className="font-display text-2xl md:text-3xl font-bold text-ink">Announcements</h1>
         <p className="text-muted text-sm mt-1">Notes &amp; messages for the academy</p>
       </div>
 
       {/* Compose */}
-      <div className="card p-5 md:p-6 mb-6">
-        <h2 className="font-display text-lg font-semibold text-ink mb-4">New Announcement</h2>
-        {error && <div className="mb-4 px-4 py-3 bg-rose/10 border border-rose/30 rounded-lg text-rose text-sm">{error}</div>}
+      <div className="card p-4 md:p-6 mb-5 md:mb-6">
+        <h2 className="font-display text-base md:text-lg font-semibold text-ink mb-3">New Announcement</h2>
+        {error && <div className="mb-3 px-3 py-2 bg-rose/10 border border-rose/30 rounded-lg text-rose text-sm">{error}</div>}
         <form onSubmit={handleCreate} className="space-y-3">
-          <textarea className="input min-h-[90px] resize-none" value={message}
-            onChange={e => setMessage(e.target.value)} placeholder="Write an announcement, reminder, or note…" required />
+          <textarea
+            className="input min-h-[80px] md:min-h-[90px] resize-none"
+            value={message}
+            onChange={e => setMessage(e.target.value)}
+            placeholder="Write an announcement, reminder, or note…"
+            required
+          />
           <div className="flex justify-end">
-            <button type="submit" disabled={saving || !message.trim()} className="btn-primary">
-              {saving ? 'Posting…' : 'Post Announcement'}
+            <button type="submit" disabled={saving || !message.trim()} className="btn-primary text-xs md:text-sm">
+              {saving ? 'Posting…' : 'Post'}
             </button>
           </div>
         </form>
@@ -94,12 +96,14 @@ export default function AnnouncementsPage() {
       ) : (
         <div className="space-y-3">
           {announcements.map((a, idx) => (
-            <div key={a._id} className={`card p-5 ${idx === 0 ? 'border-l-4 border-l-amber' : ''}`}>
+            <div key={a._id} className={`card p-4 md:p-5 ${idx === 0 ? 'border-l-4 border-l-amber' : ''}`}>
               {editingId === a._id ? (
-                /* ── Edit mode ── */
                 <div className="space-y-3">
-                  <textarea className="input min-h-[80px] resize-none" value={editMessage}
-                    onChange={e => setEditMessage(e.target.value)} />
+                  <textarea
+                    className="input min-h-[70px] resize-none text-sm"
+                    value={editMessage}
+                    onChange={e => setEditMessage(e.target.value)}
+                  />
                   <div className="flex gap-2 justify-end">
                     <button onClick={cancelEdit} className="btn-secondary text-xs px-3 py-1.5">Cancel</button>
                     <button onClick={() => handleEdit(a._id)} disabled={editSaving || !editMessage.trim()}
@@ -109,23 +113,32 @@ export default function AnnouncementsPage() {
                   </div>
                 </div>
               ) : (
-                /* ── View mode ── */
                 <>
-                  <div className="flex items-start justify-between gap-4">
+                  {/* Message + actions — stacks naturally on mobile */}
+                  <div className="flex items-start gap-3">
                     <p className="text-ink text-sm leading-relaxed flex-1">{a.message}</p>
-                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                    {/* Actions always visible, no hover-only on mobile */}
+                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
                       {idx === 0 && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber/10 text-amber">Latest</span>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber/10 text-amber whitespace-nowrap">
+                          Latest
+                        </span>
                       )}
-                      <button onClick={() => startEdit(a)} className="text-muted hover:text-amber text-xs px-2 py-1 transition-colors">Edit</button>
-                      <button onClick={() => handleDelete(a._id)} disabled={deletingId === a._id}
-                        className="text-rose/50 hover:text-rose text-xs px-2 py-1 transition-colors">
-                        {deletingId === a._id ? '…' : 'Delete'}
-                      </button>
+                      <div className="flex gap-0.5">
+                        <button onClick={() => startEdit(a)}
+                          className="text-muted hover:text-amber text-xs px-2 py-1 transition-colors rounded">
+                          Edit
+                        </button>
+                        <button onClick={() => handleDelete(a._id)} disabled={deletingId === a._id}
+                          className="text-rose/50 hover:text-rose text-xs px-2 py-1 transition-colors rounded">
+                          {deletingId === a._id ? '…' : 'Del'}
+                        </button>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 mt-3">
-                    <div className="w-5 h-5 rounded-full bg-ink/10 flex items-center justify-center text-ink text-xs font-bold">
+                  {/* Meta */}
+                  <div className="flex items-center gap-2 mt-2.5">
+                    <div className="w-5 h-5 rounded-full bg-ink/10 flex items-center justify-center text-ink text-xs font-bold flex-shrink-0">
                       {a.createdBy?.name?.[0] || 'T'}
                     </div>
                     <span className="text-muted text-xs">

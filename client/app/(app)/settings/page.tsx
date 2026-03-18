@@ -216,20 +216,20 @@ export default function SettingsPage() {
 
   /* ══════════ RENDER ══════════ */
   const tabs = [
-    { id: 'roadmap' as const, label: '🗺 Roadmap Modules', count: modules.length },
-    { id: 'tags'    as const, label: '🏷 Weakness Tags',   count: tags.length },
-    { id: 'topics'  as const, label: '💬 Topics Library',  count: topics.length },
+    { id: 'roadmap' as const, label: '🗺 Roadmap', count: modules.length },
+    { id: 'tags'    as const, label: '🏷 Tags', count: tags.length },
+    { id: 'topics'  as const, label: '💬 Topics', count: topics.length },
   ];
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl">
+    <div className="p-3 md:p-8 max-w-4xl mx-auto">
       <div className="mb-6">
         <h1 className="font-display text-2xl md:text-3xl font-bold text-ink">Settings</h1>
         <p className="text-muted text-sm mt-1">Manage all dynamic content — no developer needed.</p>
       </div>
 
       {/* Tab bar */}
-      <div className="flex gap-1 mb-6 overflow-x-auto pb-1">
+      <div className="flex flex-wrap gap-1.5 mb-6">
         {tabs.map(tab => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id)}
             className={`flex-shrink-0 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors border ${

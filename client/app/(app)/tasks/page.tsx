@@ -17,22 +17,23 @@ type Priority = typeof PRIORITIES[number];
 const isPriority = (v: string): v is Priority => PRIORITIES.includes(v as Priority);
 
 const PRIORITY_STYLES = {
-  high:   { badge: 'bg-rose/10 text-rose border-rose/20',     dot: 'bg-rose' },
-  medium: { badge: 'bg-amber/10 text-amber border-amber/20',  dot: 'bg-amber' },
-  low:    { badge: 'bg-parchment text-muted border-parchment', dot: 'bg-muted' },
+  high:   { badge: 'bg-rose/10 text-rose border-rose/20',      dot: 'bg-rose',   label: 'High' },
+  medium: { badge: 'bg-amber/10 text-amber border-amber/20',   dot: 'bg-amber',  label: 'Med' },
+  low:    { badge: 'bg-parchment text-muted border-parchment', dot: 'bg-muted',  label: 'Low' },
 };
 
 export default function TasksPage() {
-  const [tasks, setTasks]           = useState<Task[]>([]);
-  const [loading, setLoading]       = useState(true);
-  const [showDone, setShowDone]     = useState(false);
-  const [showForm, setShowForm]     = useState(false);
+  const [tasks, setTasks]             = useState<Task[]>([]);
+  const [loading, setLoading]         = useState(true);
+  const [showDone, setShowDone]       = useState(false);
+  const [showForm, setShowForm]       = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
-  const emptyForm: { title: string; notes: string; priority: Priority; dueDate: string } = { title: '', notes: '', priority: 'medium', dueDate: '' };
-  const [form, setForm]     = useState(emptyForm);
-  const [saving, setSaving] = useState(false);
-  const [error, setError]   = useState('');
+  const emptyForm: { title: string; notes: string; priority: Priority; dueDate: string } =
+    { title: '', notes: '', priority: 'medium', dueDate: '' };
+  const [form, setForm]         = useState(emptyForm);
+  const [saving, setSaving]     = useState(false);
+  const [error, setError]       = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const load = async () => {
@@ -49,8 +50,7 @@ export default function TasksPage() {
   const openEdit   = (t: Task) => {
     setEditingTask(t);
     setForm({ title: t.title, notes: t.notes || '', priority: t.priority, dueDate: t.dueDate ? t.dueDate.split('T')[0] : '' });
-    setError('');
-    setShowForm(true);
+    setError(''); setShowForm(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -70,11 +70,8 @@ export default function TasksPage() {
 
   const toggleDone = async (task: Task) => {
     const { data } = await api.put(`/tasks/${task._id}`, { done: !task.done });
-    if (showDone) {
-      setTasks(prev => prev.map(t => t._id === task._id ? data : t));
-    } else {
-      setTasks(prev => prev.filter(t => t._id !== task._id));
-    }
+    if (showDone) { setTasks(prev => prev.map(t => t._id === task._id ? data : t)); }
+    else          { setTasks(prev => prev.filter(t => t._id !== task._id)); }
   };
 
   const deleteTask = async (id: string) => {
@@ -91,59 +88,69 @@ export default function TasksPage() {
   const done     = tasks.filter(t => t.done);
 
   return (
-    <div className="p-4 md:p-8 max-w-3xl">
+    <div className="p-3 md:p-8 max-w-3xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-5 md:mb-6">
         <div>
           <h1 className="font-display text-2xl md:text-3xl font-bold text-ink">My Tasks</h1>
-          <p className="text-muted text-sm mt-0.5">Private — only visible to you</p>
+          <p className="text-muted text-xs md:text-sm mt-0.5">Private — only visible to you</p>
         </div>
-        <button onClick={openCreate} className="btn-primary">+ New Task</button>
+        <button onClick={openCreate} className="btn-primary text-xs md:text-sm px-3 py-2 md:px-4">+ New</button>
       </div>
 
       {/* Create/Edit form */}
       {showForm && (
-        <div className="card p-5 mb-6 border-l-4 border-l-amber">
-          <h2 className="font-semibold text-ink text-sm mb-4">{editingTask ? 'Edit Task' : 'New Task'}</h2>
+        <div className="card p-4 md:p-5 mb-5 border-l-4 border-l-amber">
+          <h2 className="font-semibold text-ink text-sm mb-3">{editingTask ? 'Edit Task' : 'New Task'}</h2>
           {error && <div className="mb-3 text-rose text-xs px-3 py-2 bg-rose/10 rounded-lg">{error}</div>}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3">
             <div>
               <label className="label">Title *</label>
-              <input className="input" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} required placeholder="What needs to be done?" autoFocus />
+              <input className="input" value={form.title}
+                onChange={e => setForm({ ...form, title: e.target.value })}
+                required placeholder="What needs to be done?" autoFocus />
             </div>
+            {/* Priority + Date side by side on all screen sizes — both short inputs */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="label">Priority</label>
-                <select className="input" value={form.priority} onChange={e => { if (isPriority(e.target.value)) setForm({ ...form, priority: e.target.value }); }}>
+                <select className="input" value={form.priority}
+                  onChange={e => { if (isPriority(e.target.value)) setForm({ ...form, priority: e.target.value }); }}>
                   <option value="high">🔴 High</option>
-                  <option value="medium">🟡 Medium</option>
+                  <option value="medium">🟡 Med</option>
                   <option value="low">⚪ Low</option>
                 </select>
               </div>
               <div>
                 <label className="label">Due Date</label>
-                <input type="date" className="input" value={form.dueDate} onChange={e => setForm({ ...form, dueDate: e.target.value })} />
+                <input type="date" className="input" value={form.dueDate}
+                  onChange={e => setForm({ ...form, dueDate: e.target.value })} />
               </div>
             </div>
             <div>
               <label className="label">Notes</label>
-              <textarea className="input resize-none" rows={2} value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} placeholder="Any details…" />
+              <textarea className="input resize-none" rows={2} value={form.notes}
+                onChange={e => setForm({ ...form, notes: e.target.value })} placeholder="Any details…" />
             </div>
             <div className="flex gap-2">
-              <button type="submit" disabled={saving} className="btn-primary text-sm">{saving ? 'Saving…' : editingTask ? 'Save Changes' : 'Create Task'}</button>
+              <button type="submit" disabled={saving} className="btn-primary text-sm">
+                {saving ? 'Saving…' : editingTask ? 'Save Changes' : 'Create Task'}
+              </button>
               <button type="button" onClick={() => setShowForm(false)} className="btn-secondary text-sm">Cancel</button>
             </div>
           </form>
         </div>
       )}
 
-      {/* Tab toggle */}
-      <div className="flex gap-1 mb-5">
-        <button onClick={() => setShowDone(false)} className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${!showDone ? 'bg-ink text-cream border-ink' : 'bg-white text-muted border-parchment hover:text-ink'}`}>
-          Pending {pending.length > 0 && <span className="ml-1 text-xs bg-amber/20 text-amber px-1.5 py-0.5 rounded-full">{pending.length}</span>}
+      {/* Pending / Completed tabs */}
+      <div className="flex gap-1 mb-4 md:mb-5">
+        <button onClick={() => setShowDone(false)}
+          className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${!showDone ? 'bg-ink text-cream border-ink' : 'bg-white text-muted border-parchment hover:text-ink'}`}>
+          Pending{pending.length > 0 && <span className="ml-1.5 text-xs bg-amber/20 text-amber px-1.5 py-0.5 rounded-full">{pending.length}</span>}
         </button>
-        <button onClick={() => setShowDone(true)} className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${showDone ? 'bg-ink text-cream border-ink' : 'bg-white text-muted border-parchment hover:text-ink'}`}>
-          Completed
+        <button onClick={() => setShowDone(true)}
+          className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${showDone ? 'bg-ink text-cream border-ink' : 'bg-white text-muted border-parchment hover:text-ink'}`}>
+          Done
         </button>
       </div>
 
@@ -155,34 +162,26 @@ export default function TasksPage() {
         <>
           {!showDone && (
             <>
-              {tasks.length === 0 && (
-                <div className="card p-12 text-center">
+              {pending.length === 0 && (
+                <div className="card p-10 md:p-12 text-center">
                   <p className="text-4xl mb-3">✅</p>
                   <p className="text-muted font-medium">No pending tasks</p>
-                  <button onClick={openCreate} className="text-amber text-sm hover:underline mt-2">Create your first task →</button>
+                  <button onClick={openCreate} className="text-amber text-sm hover:underline mt-2">Create one →</button>
                 </div>
               )}
-
-              {overdue.length > 0 && (
-                <TaskGroup label="⚠️ Overdue" tasks={overdue} onToggle={toggleDone} onEdit={openEdit} onDelete={deleteTask} deletingId={deletingId} />
-              )}
-              {dueToday.length > 0 && (
-                <TaskGroup label="📅 Due Today" tasks={dueToday} onToggle={toggleDone} onEdit={openEdit} onDelete={deleteTask} deletingId={deletingId} />
-              )}
-              {upcoming.length > 0 && (
-                <TaskGroup label="📋 Upcoming" tasks={upcoming} onToggle={toggleDone} onEdit={openEdit} onDelete={deleteTask} deletingId={deletingId} />
-              )}
+              {overdue.length > 0  && <TaskGroup label="⚠️ Overdue"   tasks={overdue}  onToggle={toggleDone} onEdit={openEdit} onDelete={deleteTask} deletingId={deletingId} />}
+              {dueToday.length > 0 && <TaskGroup label="📅 Due Today" tasks={dueToday} onToggle={toggleDone} onEdit={openEdit} onDelete={deleteTask} deletingId={deletingId} />}
+              {upcoming.length > 0 && <TaskGroup label="📋 Upcoming"  tasks={upcoming} onToggle={toggleDone} onEdit={openEdit} onDelete={deleteTask} deletingId={deletingId} />}
             </>
           )}
-
           {showDone && (
             done.length === 0 ? (
-              <div className="card p-12 text-center">
+              <div className="card p-10 md:p-12 text-center">
                 <p className="text-4xl mb-3">🏁</p>
                 <p className="text-muted font-medium">No completed tasks yet</p>
               </div>
             ) : (
-              <TaskGroup label={`✓ Completed (${done.length})`} tasks={done} onToggle={toggleDone} onEdit={openEdit} onDelete={deleteTask} deletingId={deletingId} isDone />
+              <TaskGroup label={`✓ Done (${done.length})`} tasks={done} onToggle={toggleDone} onEdit={openEdit} onDelete={deleteTask} deletingId={deletingId} isDone />
             )
           )}
         </>
@@ -193,14 +192,11 @@ export default function TasksPage() {
 
 function TaskGroup({ label, tasks, onToggle, onEdit, onDelete, deletingId, isDone }: {
   label: string; tasks: Task[];
-  onToggle: (t: Task) => void;
-  onEdit: (t: Task) => void;
-  onDelete: (id: string) => void;
-  deletingId: string | null;
-  isDone?: boolean;
+  onToggle: (t: Task) => void; onEdit: (t: Task) => void; onDelete: (id: string) => void;
+  deletingId: string | null; isDone?: boolean;
 }) {
   return (
-    <div className="mb-6">
+    <div className="mb-5 md:mb-6">
       <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-2">{label}</p>
       <div className="space-y-2">
         {tasks.map(task => <TaskCard key={task._id} task={task} onToggle={onToggle} onEdit={onEdit} onDelete={onDelete} deletingId={deletingId} isDone={isDone} />)}
@@ -211,66 +207,70 @@ function TaskGroup({ label, tasks, onToggle, onEdit, onDelete, deletingId, isDon
 
 function TaskCard({ task, onToggle, onEdit, onDelete, deletingId, isDone }: {
   task: Task; isDone?: boolean;
-  onToggle: (t: Task) => void;
-  onEdit: (t: Task) => void;
-  onDelete: (id: string) => void;
+  onToggle: (t: Task) => void; onEdit: (t: Task) => void; onDelete: (id: string) => void;
   deletingId: string | null;
 }) {
   const p = PRIORITY_STYLES[task.priority];
   const isOverdue = !isDone && task.dueDate && isPast(new Date(task.dueDate)) && !isToday(new Date(task.dueDate));
-  const dueToday  = !isDone && task.dueDate && isToday(new Date(task.dueDate));
+  const isDueToday = !isDone && task.dueDate && isToday(new Date(task.dueDate));
 
   return (
-    <div className={`card p-4 flex items-start gap-3 transition-all ${isDone ? 'opacity-60' : ''}`}>
+    <div className={`card p-3 md:p-4 flex items-start gap-2.5 md:gap-3 transition-all ${isDone ? 'opacity-60' : ''}`}>
       {/* Checkbox */}
-      <button
-        onClick={() => onToggle(task)}
+      <button onClick={() => onToggle(task)}
         className={`w-5 h-5 rounded-md border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-colors ${
           isDone ? 'bg-emerald border-emerald text-white' : 'border-parchment hover:border-amber'
-        }`}
-      >
+        }`}>
         {isDone && <span className="text-xs">✓</span>}
       </button>
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-2">
-          <p className={`text-sm font-medium ${isDone ? 'line-through text-muted' : 'text-ink'}`}>{task.title}</p>
-          <div className="flex items-center gap-1 flex-shrink-0">
-            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${p.badge}`}>
-              <span className={`w-1.5 h-1.5 rounded-full ${p.dot}`} />
-              {task.priority}
-            </span>
-          </div>
+        {/* Title row — badge on same line, doesn't push to next line */}
+        <div className="flex items-start gap-1.5">
+          <p className={`text-sm font-medium flex-1 min-w-0 ${isDone ? 'line-through text-muted' : 'text-ink'}`}>
+            {task.title}
+          </p>
+          {/* Priority badge — shorter label on mobile */}
+          <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium border flex-shrink-0 ${p.badge}`}>
+            <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${p.dot}`} />
+            <span className="md:hidden">{p.label}</span>
+            <span className="hidden md:inline">{task.priority}</span>
+          </span>
         </div>
+
         {task.notes && <p className="text-xs text-muted mt-0.5 line-clamp-1">{task.notes}</p>}
-        <div className="flex items-center gap-3 mt-1.5">
-          {task.dueDate && (
-            <span className={`text-xs ${isOverdue ? 'text-rose font-semibold' : dueToday ? 'text-amber font-semibold' : 'text-muted'}`}>
-              {isOverdue ? '⚠ ' : dueToday ? '📅 ' : ''}
-              {format(new Date(task.dueDate), 'MMM d, yyyy')}
-            </span>
-          )}
-          {isDone && task.doneAt && (
-            <span className="text-xs text-muted">Done {format(new Date(task.doneAt), 'MMM d')}</span>
+
+        <div className="flex items-center justify-between mt-1.5">
+          <div className="flex items-center gap-2">
+            {task.dueDate && (
+              <span className={`text-xs ${isOverdue ? 'text-rose font-semibold' : isDueToday ? 'text-amber font-semibold' : 'text-muted'}`}>
+                {isOverdue ? '⚠ ' : isDueToday ? '📅 ' : ''}
+                {format(new Date(task.dueDate), 'MMM d')}
+              </span>
+            )}
+            {isDone && task.doneAt && (
+              <span className="text-xs text-muted">Done {format(new Date(task.doneAt), 'MMM d')}</span>
+            )}
+          </div>
+
+          {/* Action buttons always visible, not hover-only */}
+          {!isDone ? (
+            <div className="flex gap-0.5">
+              <button onClick={() => onEdit(task)} className="text-xs text-muted hover:text-amber px-2 py-1 rounded transition-colors">Edit</button>
+              <button onClick={() => onDelete(task._id)} disabled={deletingId === task._id}
+                className="text-xs text-rose/50 hover:text-rose px-2 py-1 rounded transition-colors">
+                {deletingId === task._id ? '…' : 'Del'}
+              </button>
+            </div>
+          ) : (
+            <button onClick={() => onDelete(task._id)} disabled={deletingId === task._id}
+              className="text-xs text-rose/40 hover:text-rose px-2 py-1 rounded transition-colors">
+              {deletingId === task._id ? '…' : '✕'}
+            </button>
           )}
         </div>
       </div>
-
-      {/* Actions */}
-      {!isDone && (
-        <div className="flex gap-1 flex-shrink-0">
-          <button onClick={() => onEdit(task)} className="text-xs text-muted hover:text-amber transition-colors px-1.5 py-1">Edit</button>
-          <button onClick={() => onDelete(task._id)} disabled={deletingId === task._id} className="text-xs text-rose/50 hover:text-rose transition-colors px-1.5 py-1">
-            {deletingId === task._id ? '…' : 'Del'}
-          </button>
-        </div>
-      )}
-      {isDone && (
-        <button onClick={() => onDelete(task._id)} disabled={deletingId === task._id} className="text-xs text-rose/40 hover:text-rose transition-colors px-1.5 py-1 flex-shrink-0">
-          {deletingId === task._id ? '…' : '✕'}
-        </button>
-      )}
     </div>
   );
 }

@@ -87,3 +87,28 @@ input[type="range"]::-moz-range-thumb {
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #d4c9b0; border-radius: 2px; }
+
+/* ── Mobile-first fixes ──────────────────────────────────────────────────── */
+/* Prevent horizontal overflow on small screens */
+html, body { overflow-x: hidden; }
+
+/* Better touch targets on mobile */
+@media (max-width: 768px) {
+  .btn-primary, .btn-secondary, .btn-danger {
+    @apply min-h-[40px];
+  }
+  /* Input touch target */
+  .input {
+    @apply py-2.5;
+  }
+}
+
+/* Prevent iOS tap highlight */
+button, a { -webkit-tap-highlight-color: transparent; }
+
+/* Safe area padding for notched phones */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  nav.fixed.bottom-0 {
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+  }
+}

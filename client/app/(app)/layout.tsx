@@ -26,8 +26,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      {/* md: offset for sidebar, pb for mobile bottom nav */}
-      <main className="flex-1 md:ml-56 min-h-screen bg-cream pb-20 md:pb-0">
+      {/* On mobile: no left margin (no sidebar), pb-20 clears bottom nav
+          On desktop: ml-56 clears the fixed sidebar, no bottom padding needed */}
+      <main className="flex-1 min-h-screen bg-cream pb-24 md:pb-0 md:ml-56 min-w-0 overflow-x-hidden">
         {children}
       </main>
     </div>
