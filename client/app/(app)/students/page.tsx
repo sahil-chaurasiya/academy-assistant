@@ -114,22 +114,29 @@ export default function StudentsPage() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-5xl mx-auto">
+    <div className="p-4 md:p-8 max-w-5xl mx-auto w-full" style={{ overflowX: 'clip' }}>
+
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="font-display text-2xl md:text-3xl font-bold text-ink">Students</h1>
           <p className="text-muted text-xs md:text-sm mt-0.5">{students.length} enrolled</p>
         </div>
-        <Link href="/students/new" className="btn-primary text-xs md:text-sm px-3 py-2 md:px-4">+ Add</Link>
+        <Link href="/students/new" className="btn-primary text-xs md:text-sm px-3 py-2 md:px-4 flex-shrink-0">+ Add</Link>
       </div>
 
       {/* Search + filter toggle */}
-      <div className="flex gap-2 mb-3">
-        <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-          placeholder="Search name or phone…" className="input flex-1 min-w-0" />
-        <button onClick={() => setShowFilters(f => !f)}
-          className={`btn-secondary text-xs px-3 whitespace-nowrap flex-shrink-0 ${hasActiveFilters ? 'border-amber text-amber' : ''}`}>
+      <div className="flex gap-2 mb-3 min-w-0">
+        <input
+          type="text" value={search} onChange={e => setSearch(e.target.value)}
+          placeholder="Search name or phone…"
+          // ✅ w-0 + flex-1 is the correct pattern to make an input shrink in a flex row
+          className="input flex-1 w-0 min-w-0"
+        />
+        <button
+          onClick={() => setShowFilters(f => !f)}
+          className={`btn-secondary text-xs px-3 whitespace-nowrap flex-shrink-0 ${hasActiveFilters ? 'border-amber text-amber' : ''}`}
+        >
           {showFilters ? '▲' : '▼'} Filter{hasActiveFilters ? ' ●' : ''}
         </button>
         {hasActiveFilters && (
@@ -140,10 +147,11 @@ export default function StudentsPage() {
       {/* Filter panel */}
       {showFilters && (
         <div className="card p-4 mb-4 space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+          {/* ✅ grid-cols-1 on xs, grid-cols-2 from sm upward */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="label">Level</label>
-              <select className="input" value={levelFilter} onChange={e => setLevel(e.target.value)}>
+              <select className="input w-full" value={levelFilter} onChange={e => setLevel(e.target.value)}>
                 <option value="">All</option>
                 <option>Beginner</option><option>Intermediate</option><option>Advanced</option>
               </select>
@@ -151,20 +159,20 @@ export default function StudentsPage() {
             <div>
               <label className="label">Rating</label>
               <div className="flex gap-1 items-center">
-                <input type="number" min={1} max={10} className="input" placeholder="1" value={ratingMin} onChange={e => setRatingMin(e.target.value)} />
-                <span className="text-muted text-xs">–</span>
-                <input type="number" min={1} max={10} className="input" placeholder="10" value={ratingMax} onChange={e => setRatingMax(e.target.value)} />
+                <input type="number" min={1} max={10} className="input w-full" placeholder="1"  value={ratingMin} onChange={e => setRatingMin(e.target.value)} />
+                <span className="text-muted text-xs flex-shrink-0">–</span>
+                <input type="number" min={1} max={10} className="input w-full" placeholder="10" value={ratingMax} onChange={e => setRatingMax(e.target.value)} />
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="label">Joined from</label>
-              <input type="date" className="input" value={joinedFrom} onChange={e => setJoinedFrom(e.target.value)} />
+              <input type="date" className="input w-full" value={joinedFrom} onChange={e => setJoinedFrom(e.target.value)} />
             </div>
             <div>
               <label className="label">Joined to</label>
-              <input type="date" className="input" value={joinedTo} onChange={e => setJoinedTo(e.target.value)} />
+              <input type="date" className="input w-full" value={joinedTo} onChange={e => setJoinedTo(e.target.value)} />
             </div>
           </div>
           {tags.length > 0 && (
@@ -189,22 +197,33 @@ export default function StudentsPage() {
       {/* Bulk action bar */}
       {selected.size > 0 && (
         <div className="card p-3 mb-4 bg-ink/5 border-ink/20 space-y-2">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-semibold text-ink">{selected.size} selected</span>
-            <select className="input w-auto text-xs py-1.5 flex-1 min-w-0" value={bulkAction}
-              onChange={e => { setBulkAction(e.target.value); setBulkMessage(''); }}>
-              <option value="">Action…</option>
-              <option value="assignTopic">Assign topic</option>
-              <option value="addTags">Add tags</option>
-              <option value="removeTags">Remove tags</option>
-              <option value="delete">Delete</option>
-            </select>
-            <button onClick={handleBulk} disabled={bulkRunning || !bulkAction}
-              className={`btn-primary text-xs px-3 py-1.5 flex-shrink-0 ${bulkAction === 'delete' ? 'bg-rose' : ''}`}>
-              {bulkRunning ? '…' : 'Apply'}
-            </button>
-            <button onClick={() => { setSelected(new Set()); setBulkAction(''); }}
-              className="text-xs text-muted hover:text-ink flex-shrink-0">✕</button>
+          {/* ✅ Stack vertically on mobile, row on sm+ */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+            <span className="text-xs font-semibold text-ink flex-shrink-0">{selected.size} selected</span>
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              {/* ✅ min-w-0 lets the select shrink; flex-1 fills available space */}
+              <select
+                className="input text-xs py-1.5 flex-1 min-w-0"
+                value={bulkAction}
+                onChange={e => { setBulkAction(e.target.value); setBulkMessage(''); }}
+              >
+                <option value="">Action…</option>
+                <option value="assignTopic">Assign topic</option>
+                <option value="addTags">Add tags</option>
+                <option value="removeTags">Remove tags</option>
+                <option value="delete">Delete</option>
+              </select>
+              <button
+                onClick={handleBulk} disabled={bulkRunning || !bulkAction}
+                className={`btn-primary text-xs px-3 py-1.5 flex-shrink-0 ${bulkAction === 'delete' ? 'bg-rose' : ''}`}
+              >
+                {bulkRunning ? '…' : 'Apply'}
+              </button>
+              <button
+                onClick={() => { setSelected(new Set()); setBulkAction(''); }}
+                className="text-xs text-muted hover:text-ink flex-shrink-0"
+              >✕</button>
+            </div>
           </div>
           {bulkAction === 'assignTopic' && (
             <select className="input w-full text-xs py-1.5" value={bulkTopicId} onChange={e => setBulkTopicId(e.target.value)}>
@@ -250,8 +269,8 @@ export default function StudentsPage() {
           </div>
 
           {students.map(s => (
-            <div key={s._id} className={`card p-3 md:p-4 hover:shadow-card-hover transition-shadow ${selected.has(s._id) ? 'ring-2 ring-amber/40' : ''}`}>
-              <div className="flex items-start gap-2.5">
+            <div key={s._id} className={`card overflow-hidden hover:shadow-card-hover transition-shadow ${selected.has(s._id) ? 'ring-2 ring-amber/40' : ''}`}>
+              <div className="flex items-start gap-2.5 p-3 md:p-4 w-full box-border">
                 <input type="checkbox" checked={selected.has(s._id)} onChange={() => toggleSelect(s._id)}
                   className="w-4 h-4 accent-amber cursor-pointer mt-1 flex-shrink-0" />
 
@@ -259,15 +278,19 @@ export default function StudentsPage() {
                   {s.name[0]}
                 </div>
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
-                    <Link href={`/students/${s._id}`} className="font-semibold text-ink hover:text-amber transition-colors text-sm">
+                <div className="flex-1 overflow-hidden" style={{ minWidth: 0 }}>
+                  <div className="flex items-center gap-1.5 flex-wrap mb-0.5 pr-1">
+                    <Link href={`/students/${s._id}`} className="font-semibold text-ink hover:text-amber transition-colors text-sm break-words">
                       {s.name}
                     </Link>
-                    <span className={levelColor(s.level)}>{s.level}</span>
+                    <span className={`${levelColor(s.level)} flex-shrink-0`}>{s.level}</span>
                   </div>
-                  <p className="text-muted text-xs">{s.phone}</p>
-                  {s.goal && <p className="text-muted text-xs mt-0.5 truncate">Goal: {s.goal}</p>}
+                  <p className="text-muted text-xs truncate pr-1">{s.phone}</p>
+                  {s.goal && (
+                    <p className="text-muted text-xs mt-0.5 pr-1" style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+                      Goal: {s.goal}
+                    </p>
+                  )}
                   {s.weaknessTags?.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-1">
                       {s.weaknessTags.map(tagName => {
@@ -281,20 +304,28 @@ export default function StudentsPage() {
                     </div>
                   )}
 
-                  {/* Actions row — below info on mobile */}
-                  <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                    <span className="text-muted text-[10px] hidden sm:block">{format(new Date(s.joiningDate), 'MMM yyyy')}</span>
-                    <button onClick={() => handleCheckIn(s._id)} disabled={checkedInIds.has(s._id)}
-                      className={`text-xs px-2 py-1 rounded-lg border font-semibold transition-colors ${
+                  {/* Actions row */}
+                  <div className="flex items-center gap-1.5 mt-2 flex-wrap pr-1">
+                    <span className="text-muted text-[10px] hidden sm:block flex-shrink-0">
+                      {format(new Date(s.joiningDate), 'MMM yyyy')}
+                    </span>
+                    <button
+                      onClick={() => handleCheckIn(s._id)} disabled={checkedInIds.has(s._id)}
+                      className={`text-xs px-2 py-1 rounded-lg border font-semibold transition-colors flex-shrink-0 ${
                         checkedInIds.has(s._id)
                           ? 'bg-emerald/10 text-emerald border-emerald/20 cursor-default'
                           : 'bg-parchment text-ink border-amber/30 hover:border-amber/60'
-                      }`}>
+                      }`}
+                    >
                       {checkedInIds.has(s._id) ? '✓ Present' : 'Mark Present'}
                     </button>
-                    <Link href={`/students/${s._id}/edit`} className="text-xs px-2 py-1 rounded-lg border bg-parchment text-ink border-amber/30 hover:border-amber/60 font-semibold transition-colors">Edit</Link>
-                    <button onClick={() => handleDelete(s._id, s.name)} disabled={deletingId === s._id}
-                      className="text-rose/60 hover:text-rose text-xs px-1.5 py-1 transition-colors">
+                    <Link href={`/students/${s._id}/edit`} className="text-xs px-2 py-1 rounded-lg border bg-parchment text-ink border-amber/30 hover:border-amber/60 font-semibold transition-colors flex-shrink-0">
+                      Edit
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(s._id, s.name)} disabled={deletingId === s._id}
+                      className="text-rose/60 hover:text-rose text-xs px-1.5 py-1 transition-colors flex-shrink-0"
+                    >
                       {deletingId === s._id ? '…' : 'Delete'}
                     </button>
                   </div>
